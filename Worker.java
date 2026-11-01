@@ -23,7 +23,7 @@ class Worker extends Ant{
     List<Pheromone<Float>> trail = new ArrayList<>();
    
     
-    private Point position;
+   
 
     public Worker (int health, int stamina) {
        super(health,stamina);
@@ -33,7 +33,6 @@ class Worker extends Ant{
        this.foodCarried = 0 ;
     }
 
-    public Point getPosition() { return position;}
 
 
 

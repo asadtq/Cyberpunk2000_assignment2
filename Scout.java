@@ -7,7 +7,6 @@ import java.util.Random;
 
      class Scout extends Ant { 
         boolean pathfinding;
-        private Point position;
         private Random random;
 
         public Scout(int health , int stamina) {
@@ -17,9 +16,7 @@ import java.util.Random;
             this.pathfinding = false;
         }
 
-        public Point getPosition() {
-            return position;
-        }
+
 
         public void setPathfinding(boolean pathfinding_set) {
             this.pathfinding = pathfinding_set;
