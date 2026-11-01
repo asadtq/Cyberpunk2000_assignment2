@@ -143,6 +143,7 @@ public void returnToColony() {
 
     if (Main.pheromoneGrid[newX][newY] != null ){ 
         Main.pheromoneGrid[newX][newY].reinforce(REINFORCE_AMOUNT);
+        System.out.println("Reinforced trail at " + newX + ", " + newY);
     }
 
 

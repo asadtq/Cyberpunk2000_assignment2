@@ -56,14 +56,16 @@ public class Main {
                     pheromoneCount++;
             }
         }
-        if (DEBUG) System.out.println("Pheromones: " + pheromoneCount);
-
+        if (DEBUG) {
+            System.out.println("Pheromones: " + pheromoneCount);
+            System.out.println("Avg pheromone strength: " + averagePheromoneStrength());
+        }
         // debug for workers update
         if (DEBUG) {
         for (Worker worker : workers) {
             Point p = worker.getPosition();
             System.out.println("Worker at: " + p.x + ", " + p.y);
-            System.out.println("Avg pheromone strength: "+ averagePheromoneStrength());
+          
         }
     }
 
