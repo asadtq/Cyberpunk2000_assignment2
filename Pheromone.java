@@ -15,7 +15,6 @@ public class Pheromone<T extends Number> {
     public T getStrength() { return strength; }
     public Point getPosition() { return position; }
     
-
 public void decay() {
     decay(0.99f); // normal food trails fade at 1% per tick
 }
@@ -28,4 +27,6 @@ public void decay(float rate) {
     float current = ((Number) strength).floatValue();
     float decayed = current * rate;
     this.strength = (T) Float.valueOf(decayed);
+}
+
 }
