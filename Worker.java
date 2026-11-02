@@ -19,12 +19,6 @@ class Worker extends Ant{
     int lastX = -1;
     int lastY = -1;
 
-    // running away from danger (the spider's 3x3 patch)
-    boolean fleeing = false;
-    int fleeTimer = 0;
-    int fleeDx = 0;
-    int fleeDy = 0;
-    static final int FLEE_TICKS = 20; // workers move every tick and a tick is 100ms, so 20 = 2 seconds
     
     //pheremone trail lists
     List<Pheromone<Float>> trail = new ArrayList<>();
@@ -122,42 +116,11 @@ class Worker extends Ant{
   }
        
 
-public boolean isFleeing() { return fleeing; }
-
-    // called after the worker moves. oldX and oldY are where it was before the move
-    public void checkForDanger(int oldX, int oldY) {
-        if (fleeing) return; // already running, dont restart the timer
-
-        if (Main.dangerGrid[position.x][position.y] != null) {
-            fleeing = true;
-            fleeTimer = FLEE_TICKS;
-
-            // opposite direction = back the way it came from
-            fleeDx = oldX - position.x;
-            fleeDy = oldY - position.y;
-
-            // if it didnt actually move, just pick a random way to run
-            if (fleeDx == 0 && fleeDy == 0) {
-                fleeDx = random.nextInt(3) - 1;
-                fleeDy = random.nextInt(3) - 1;
-            }
-        }
-    }
-
-    // run in a straight line in the opposite direction away from the danger until the timer runs out
+// same as Ant.flee() but when it stops running it forgets the old trail spot so it can pick the trail up again
+    @Override
     public void flee() {
-        int newX = position.x + (fleeDx *-1);
-        int newY = position.y + (fleeDy *-1);
-
-        // only move if its still on the map (otherwise it just stops at the edge)
-        if (newX >= 0 && newX < Main.WIDTH && newY >= 0 && newY < Main.HEIGHT) {
-            this.position.setLocation(newX, newY);
-        }
-
-        fleeTimer--;
-        if (fleeTimer <= 0) {
-            fleeing = false;
-            // forget the old trail position so it can pick the trail up again
+        super.flee();
+        if (!fleeing) {
             lastX = -1;
             lastY = -1;
         }

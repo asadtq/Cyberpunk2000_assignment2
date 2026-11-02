@@ -24,7 +24,7 @@ public class Queen extends Ant{
             return null;
         }
         stamina -= WORKER_COST;
-        Worker worker = new Worker(100, 100);
+        Worker worker = (Worker) AntFactory.create(AntType.WORKER);
         workers.add(worker);
         System.out.println("Queen spawned " + worker + ". Energy left: " + stamina);
 
@@ -37,7 +37,7 @@ public class Queen extends Ant{
             return null;
         }
         stamina -= SCOUT_COST;
-        Scout scout = new Scout(100, 100);
+        Scout scout = (Scout) AntFactory.create(AntType.SCOUT);
         scouts.add(scout);
         System.out.println("Queen: thinks that ant died, sending emergency scout. Remaining stamina: " + stamina);
         return scout;

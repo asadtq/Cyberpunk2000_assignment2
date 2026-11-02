@@ -90,7 +90,7 @@ static void update() {
     }
     spider.act(scouts, workers, moveSpiderNow);
 
-    // anything the spider ate gets removed from the colony (lambda: remove every ant that is not alive)
+    // lambda: remove every ant that is not alive
     scouts.removeIf(a -> !a.isAlive());
     workers.removeIf(a -> !a.isAlive());
     
@@ -127,6 +127,16 @@ static void moveScouts() {
     for (int i = 0; i < scouts.size(); i++) {
         Scout scouterAnt = scouts.get(i);
 
+        // scout is running away from the danger, thats all it does this tick
+        if (scouterAnt.isFleeing()) {
+            scouterAnt.flee();
+            continue;
+        }
+
+        // remember where the scout was so we know which way it came from
+        int oldX = scouterAnt.getPosition().x;
+        int oldY = scouterAnt.getPosition().y;
+
         if (scouterAnt.isPathfinding()) {
             scouterAnt.returnToColony(WIDTH, HEIGHT);
 
@@ -143,6 +153,9 @@ static void moveScouts() {
         } else {
             scouterAnt.wander(WIDTH, HEIGHT);
         }
+
+        // if the scout just stepped into the danger square, make it run the other way
+        scouterAnt.checkForDanger(oldX, oldY);
     }
 }
 
@@ -169,7 +182,7 @@ static void moveWorkers() {
 
             if (workerAnt.getPosition().x == WIDTH / 2 && workerAnt.getPosition().y == HEIGHT / 2) {
                 workerAnt.setReportingDeath(false);
-                System.out.println("Queen: a worker died, we need more!");
+                System.out.println("Queen: a worker died, send out more!");
                 Worker replacement = queen.prodWorker();
                 if (replacement != null) {
                     workers.add(replacement);
@@ -277,7 +290,7 @@ static Pheromone<Float>[][] dangerGrid = new Pheromone[WIDTH][HEIGHT];
 public static void main(String[] args) {
     
     initGrid();
-    JFrame frame = new JFrame("Ant Colony");
+    JFrame frame = new JFrame("Ant Colony Assignment 2 Project");
 
     JPanel panel = new JPanel() {
         @Override 
@@ -406,12 +419,12 @@ static void initGrid () {
     queen = new Queen(100,100);
     grid[WIDTH / 2][HEIGHT / 2] = CellType.QUEEN;
     // Spawn Scouts
-    scouts.add(new Scout(100, 100));
-    scouts.add(new Scout(100, 100));
-    scouts.add(new Scout(100, 100));
+    scouts.add((Scout) AntFactory.create(AntType.SCOUT));
+    scouts.add((Scout) AntFactory.create(AntType.SCOUT));
+    scouts.add((Scout) AntFactory.create(AntType.SCOUT));
 
     // Spawn Spider
-    spider = new Spider(100, 100);
+    spider = (Spider) AntFactory.create(AntType.SPIDER);
 
     // scatter food 
     Random random = new Random();
