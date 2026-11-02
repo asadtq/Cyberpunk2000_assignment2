@@ -50,15 +50,21 @@ class Worker extends Ant{
         int nextY = cy;
         float best = 999.0f; // look for lowest
 
-        int[][] dirs = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+        // 8 directions, scouts walk diagonally so the trail has diagonal steps in it
+        int[][] dirs = {{1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
         
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < dirs.length; i++) {
             try {
                 int checkX = cx + dirs[i][0];
                 int checkY = cy + dirs[i][1];
                 //if this tile isnt the same as the last one we stood on. 
                 if (checkX == lastX && checkY == lastY) {
                     continue; 
+                }
+
+                // danger pheromone (a spider ate something here), dont walk into it
+                if (Main.dangerGrid[checkX][checkY] != null) {
+                    continue;
                 }
                 
                 if (Main.pheromoneGrid[checkX][checkY] != null) {
@@ -80,6 +86,10 @@ class Worker extends Ant{
         // anti-stuck code
         if (nextX == cx && nextY == cy) {
             wander(20,20);
+            // wander already moved us, dont overwrite it with the old position below
+            this.lastX = cx;
+            this.lastY = cy;
+            return;
         }
         
         // last moven spot
@@ -118,6 +128,3 @@ public void dropFood() throws Exception {
     }
     
 }
-
-
- 
