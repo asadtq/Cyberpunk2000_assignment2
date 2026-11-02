@@ -16,7 +16,7 @@ public class Main {
     static int respawnTimer = 0 ;
     static int scoutspawnTimer = 0 ;
     static final int scoutSPAWN_RATE = 30; 
-    static final int MAX_SCOUTS = 2 ;
+    static final int MAX_SCOUTS = 4 ;
     static final int RESPAWN_RATE = 50;// so every 50 ticks
     static int scoutMoveTimer = 0 ;
     static final int SCOUT_MOVE_RATE = 2; // move every 3 ticks
@@ -84,7 +84,7 @@ public class Main {
             Worker worker = queen.prodWorker();
             if (worker != null) {
                 workers.add(worker);
-                scoutspawnTimer = 0;
+                workerSpawnTimer = 0;
             }
         }
 
@@ -105,14 +105,8 @@ public class Main {
         workerMoveTimer++;
         if (workerMoveTimer >= WORKER_MOVE_RATE) {
            for (Worker worker : workers) {
-            if( worker.isCarryingFood()) {
-                worker.returnToColony();
-            } else {
-                Point p = worker.getPosition();
-                worker.detectPheromones(p.x, p.y);
-                worker.followTrail();
+           worker.update();
            }
-    }
     workerMoveTimer = 0;
     }
 
