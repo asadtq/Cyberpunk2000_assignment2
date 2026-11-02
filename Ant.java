@@ -5,7 +5,7 @@ public class Ant implements AntBehaviour {
          int health;
          int stamina;
         boolean alive ;
-        protected Point position;
+        Point position;
         // static final cost ;
 
         //constructor 
@@ -21,17 +21,7 @@ public class Ant implements AntBehaviour {
         public int getStamina() {return stamina;}
         public void die() {alive = false ; health = 0;}
         public boolean isAlive() { return alive;}
-
-        public void move(Point destination) { 
-                
-              
-                if(destination == null) {
-                        throw new InvalidPositionException("_Ant should not move to null position!_");
-                }
-                this.position = destination;
-        }
-
-
+        public void move(Point destination) { this.position = destination;}
         public Point getPosition() { return position;}
         public void takeDamage(int amount) {
                 this.health -= amount;

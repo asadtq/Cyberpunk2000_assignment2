@@ -32,14 +32,5 @@ float decayed = current * 0.99f;
     this.strength = (T) Float.valueOf(decayed);
 
 }
-
-@SuppressWarnings("unchecked")
-public void reinforce(float amount) {
-
-    float current = ((Number) strength).floatValue();
-    float reinforced = Math.min(current + amount, 1.0f);
-
-        this.strength = (T) Float.valueOf(reinforced);
-}
     
 }

@@ -51,10 +51,3 @@ Inherited variable : Health , Stamina , Bool Alive
 
 
 We should use some generics in the project 
-
-Pheromone trails .
-
-Scouts find food and leave white cells on the way home . They start fully white because new 
-pheromones have strength 1.0f.
-Unused trail cells fade to black over about 7 to 10 seconds
-A cell under a worker carrying food stays white

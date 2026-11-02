@@ -1,12 +1,9 @@
 import java.awt.Point;
 import java.util.Random;
 
-
-/* 1. Scounts should wander randomly , 2. When they find food - mark it with pheromones and return to colony
-3. Not pick up food - that's the Worker's job */
-
      class Scout extends Ant { 
         boolean pathfinding;
+        private Point position;
         private Random random;
 
         public Scout(int health , int stamina) {
@@ -16,7 +13,9 @@ import java.util.Random;
             this.pathfinding = false;
         }
 
-
+        public Point getPosition() {
+            return position;
+        }
 
         public void setPathfinding(boolean pathfinding_set) {
             this.pathfinding = pathfinding_set;
@@ -32,14 +31,12 @@ import java.util.Random;
         int dx = random.nextInt(3) - 1;
         int dy = random.nextInt(3) - 1;
 
-        // Calculate new potential position
         int newX = position.x + dx;
         int newY = position.y + dy;
 
-
-         //Boundary check for wander 
-        // have to check that newX/newY are within the grid otherwise might cause arrayoutofbounds exception
+        //Boundary check for wander 
         if (newX < 0 || newX >= gridWidth || newY < 0 || newY >= gridHeight) return;
+        
         // new pos
         this.position.setLocation(newX, newY);
 
@@ -81,10 +78,7 @@ import java.util.Random;
         return new Pheromone<>(new Point(this.position), 1.0f);
     }
 
-    public Point findFood(Point currentPosition) {
-        // Placeholder for future pathfinding implementation
-        return null;
-    }
+
 } 
 
     
