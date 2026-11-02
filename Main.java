@@ -27,6 +27,9 @@ static final int MAX_WORKERS = 5;
 
 
 static Queen queen;
+static Spider spider;
+static int spiderMoveTimer = 0;
+static final int SPIDER_MOVE_RATE = 3; // spider moves every 3 ticks
 static List<Scout> scouts = new ArrayList<>();
 static List<Worker> workers = new ArrayList<>();
 
@@ -69,6 +72,19 @@ static void update() {
         stopGame = true;
         return; // no point decaying pheromones etc, the game is over
     }
+
+    // spider moves slower than the ants
+    spiderMoveTimer++;
+    boolean moveSpiderNow = false;
+    if (spiderMoveTimer >= SPIDER_MOVE_RATE) {
+        moveSpiderNow = true;
+        spiderMoveTimer = 0;
+    }
+    spider.act(scouts, workers, moveSpiderNow);
+
+    // anything the spider ate gets removed from the colony (lambda: remove every ant that is not alive)
+    scouts.removeIf(a -> !a.isAlive());
+    workers.removeIf(a -> !a.isAlive());
     
     // for each cell in the pheromone grid, decay the pheromone strength and clear it if it falls below a threshold
     for (int x = 0; x < WIDTH; x++) {
@@ -79,6 +95,14 @@ static void update() {
                     pheromoneGrid[x][y] = null; // Clear when faded
                 }
 
+            }
+
+            // danger pheromone fades slower (0.5% per tick) so ants avoid the spot for ~1 minute
+            if (dangerGrid[x][y] != null) {
+                dangerGrid[x][y].decay(0.995f);
+                if (dangerGrid[x][y].getStrength() < 0.05f) {
+                    dangerGrid[x][y] = null;
+                }
             }
         }
     }
@@ -118,6 +142,10 @@ while (foodPlaced < 3){
 static CellType[][] grid = new CellType[WIDTH][HEIGHT];
 @SuppressWarnings("unchecked")
 static Pheromone<Float>[][] pheromoneGrid = new Pheromone[WIDTH][HEIGHT];
+
+// second pheromone layer: left behind when the spider kills an ant, ants avoid it
+@SuppressWarnings("unchecked")
+static Pheromone<Float>[][] dangerGrid = new Pheromone[WIDTH][HEIGHT];
 
 public static void main(String[] args) {
     
@@ -190,6 +218,19 @@ static void drawGrid(Graphics g) {
                 }
             }
 
+            // draw danger pheromone (orange) on top
+            if (dangerGrid[x][y] != null) {
+                int dangerAlpha = (int)(dangerGrid[x][y].getStrength() * 160);
+                if (dangerAlpha > 255) {
+                    dangerAlpha = 255;
+                }
+                if (dangerAlpha < 0) {
+                    dangerAlpha = 0;
+                }
+                g.setColor(new Color(255, 140, 0, dangerAlpha));
+                g.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            }
+
             g.setColor(Color.DARK_GRAY);
             g.drawRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
@@ -214,6 +255,14 @@ static void drawGrid(Graphics g) {
         // make them slightly smaller than the cell size so they fit
         g.fillOval(p.x * CELL_SIZE + 5, p.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
     }
+
+    // draw spider (magenta body, white eyes)
+    Point sp = spider.getPosition();
+    g.setColor(Color.MAGENTA);
+    g.fillOval(sp.x * CELL_SIZE + 2, sp.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+    g.setColor(Color.WHITE);
+    g.fillOval(sp.x * CELL_SIZE + 8, sp.y * CELL_SIZE + 9, 5, 5);
+    g.fillOval(sp.x * CELL_SIZE + 17, sp.y * CELL_SIZE + 9, 5, 5);
 }
 
 
@@ -233,6 +282,9 @@ static void initGrid () {
     scouts.add(new Scout(100, 100));
     scouts.add(new Scout(100, 100));
     scouts.add(new Scout(100, 100));
+
+    // Spawn Spider
+    spider = new Spider(100, 100);
 
     // scatter food 
     Random random = new Random();
