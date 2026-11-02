@@ -46,7 +46,16 @@ public class Queen extends Ant{
         return scout;
     }
 
+    // queen only ages every AGING_RATE ticks (was every single tick, which killed the colony in ~10 seconds
+    // before workers could deliver food; set to 1 for the original behaviour)
+    static final int AGING_RATE = 3;
+    int ageTimer = 0;
+
     public void gettingOld() throws QueenDeadException {
+        ageTimer++;
+        if (ageTimer < AGING_RATE) return;
+        ageTimer = 0;
+
         stamina -= 1;
         if (stamina <= 0) {
             System.out.println("Queen: Colony collapsed, queen dead.");
@@ -68,7 +77,7 @@ public class Queen extends Ant{
         // queen slowly gets old every tick, loses a bit of stamina
         theQueen.gettingOld();
 
-        // ---------------------------------------------- SCOUTS 
+        //  SCOUTS 
         if (moveScouts) {
             for (int i = 0; i < scoutList.size(); i++) {
                 Scout scouterAnt = scoutList.get(i);
@@ -98,7 +107,7 @@ public class Queen extends Ant{
             }
         }
 
-        // ---------------------------------------------- WORKERS 
+        // /////////////////////////////////////// WORKERS 
         if (moveWorkers) {
             for (int j = 0; j < workerList.size(); j++) {
                 Worker workerAnt = workerList.get(j);
@@ -133,8 +142,8 @@ public class Queen extends Ant{
             }
         }
 
-        // ---------------------------------------------- PANIC CHECKS
-        // queen doesnt magically know an ant died, she just waits a while, and if no ant comes home, she assumes they died and makes a new one
+        // PANIC CHECKS
+        // queen waits a while, and if no ant comes home, she assumes they died and makes a new one
         noScoutTimer++;
         noWorkerTimer++;
 
