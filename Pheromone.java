@@ -15,22 +15,17 @@ public class Pheromone<T extends Number> {
     public T getStrength() { return strength; }
     public Point getPosition() { return position; }
     
-@SuppressWarnings("unchecked")    
-/*Needed as the T cast cant be fully verified at compile
- time due to type erasure*/
 
 public void decay() {
-
-    // pheromone fades over time 
-    //1. Gets the current strength as a float
-    //2. Multiplies by 0.99f
-    //3. Updates the strength
-    // Cast the result back
-
-float current = ((Number) strength).floatValue();
-float decayed = current * 0.99f;
-    this.strength = (T) Float.valueOf(decayed);
-
+    decay(0.99f); // normal food trails fade at 1% per tick
 }
-    
+
+/*Needed as the T cast cant be fully verified at compile
+ time due to type erasure*/
+// caller picks the rate, so danger pheromone can linger longer than food trails
+@SuppressWarnings("unchecked")
+public void decay(float rate) {
+    float current = ((Number) strength).floatValue();
+    float decayed = current * rate;
+    this.strength = (T) Float.valueOf(decayed);
 }
