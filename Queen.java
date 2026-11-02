@@ -77,7 +77,7 @@ public class Queen extends Ant{
         // queen slowly gets old every tick, loses a bit of stamina
         theQueen.gettingOld();
 
-        //  SCOUTS 
+        // ---------------------------------------------- SCOUTS 
         if (moveScouts) {
             for (int i = 0; i < scoutList.size(); i++) {
                 Scout scouterAnt = scoutList.get(i);
@@ -107,10 +107,38 @@ public class Queen extends Ant{
             }
         }
 
-        // /////////////////////////////////////// WORKERS 
+        // ---------------------------------------------- WORKERS 
         if (moveWorkers) {
             for (int j = 0; j < workerList.size(); j++) {
                 Worker workerAnt = workerList.get(j);
+
+                // worker is running away from the danger, thats all it does this tick
+                if (workerAnt.isFleeing()) {
+                    workerAnt.flee();
+                    continue;
+                }
+
+                // remember where the worker was so we know which way it came from
+                int oldX = workerAnt.getPosition().x;
+                int oldY = workerAnt.getPosition().y;
+
+                if (workerAnt.isReportingDeath()) {
+                    // run straight home to tell the queen
+                    int rdx = Integer.compare(width / 2, workerAnt.getPosition().x);
+                    int rdy = Integer.compare(height / 2, workerAnt.getPosition().y);
+                    workerAnt.getPosition().translate(rdx, rdy);
+
+                    if (workerAnt.getPosition().x == width / 2 && workerAnt.getPosition().y == height / 2) {
+                        workerAnt.setReportingDeath(false);
+                        System.out.println("Queen: a worker died, we need more!");
+                        Worker replacement = theQueen.prodWorker();
+                        if (replacement != null) {
+                            workerList.add(replacement);
+                        }
+                    }
+                    continue; // skip the normal worker stuff this tick
+
+                }
 
                 if (workerAnt.isCarryingFood()) {
                     // move the worker back to the colony
@@ -139,11 +167,14 @@ public class Queen extends Ant{
                         grid [wx][wy] = Main.CellType.EMPTY;
                     }
                 }
+
+                // if the worker just stepped into the danger square, make it run the other way
+                workerAnt.checkForDanger(oldX, oldY);
             }
         }
 
-        // PANIC CHECKS
-        // queen waits a while, and if no ant comes home, she assumes they died and makes a new one
+        // ---------------------------------------------- PANIC CHECKS
+        // queen doesnt magically know an ant died, she just waits a while, and if no ant comes home, she assumes they died and makes a new one
         noScoutTimer++;
         noWorkerTimer++;
 

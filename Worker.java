@@ -13,8 +13,18 @@ class Worker extends Ant{
     boolean carryingFood;
     int foodCarried;
 
+    // true when this worker saw the spider kill an ant and is running home to tell the queen
+    boolean reportingDeath = false;
+
     int lastX = -1;
     int lastY = -1;
+
+    // running away from danger (the spider's 3x3 patch)
+    boolean fleeing = false;
+    int fleeTimer = 0;
+    int fleeDx = 0;
+    int fleeDy = 0;
+    static final int FLEE_TICKS = 20; // workers move every tick and a tick is 100ms, so 20 = 2 seconds
     
     //pheremone trail lists
     List<Pheromone<Float>> trail = new ArrayList<>();
@@ -33,6 +43,8 @@ class Worker extends Ant{
         this.followingTrail = followingTrail;
     }
     public boolean isFollowingTrail() { return followingTrail;}
+    public void setReportingDeath(boolean reportingDeath) { this.reportingDeath = reportingDeath; }
+    public boolean isReportingDeath() { return reportingDeath; }
     public void setCarryingFood(boolean carryingFood) {
         this.carryingFood = carryingFood;
     }
@@ -60,11 +72,6 @@ class Worker extends Ant{
                 //if this tile isnt the same as the last one we stood on. 
                 if (checkX == lastX && checkY == lastY) {
                     continue; 
-                }
-
-                // danger pheromone (a spider ate something here), dont walk into it
-                if (Main.dangerGrid[checkX][checkY] != null) {
-                    continue;
                 }
                 
                 if (Main.pheromoneGrid[checkX][checkY] != null) {
@@ -114,6 +121,47 @@ class Worker extends Ant{
         this.position.setLocation(newX, newY);
   }
        
+
+public boolean isFleeing() { return fleeing; }
+
+    // called after the worker moves. oldX and oldY are where it was before the move
+    public void checkForDanger(int oldX, int oldY) {
+        if (fleeing) return; // already running, dont restart the timer
+
+        if (Main.dangerGrid[position.x][position.y] != null) {
+            fleeing = true;
+            fleeTimer = FLEE_TICKS;
+
+            // opposite direction = back the way it came from
+            fleeDx = oldX - position.x;
+            fleeDy = oldY - position.y;
+
+            // if it didnt actually move, just pick a random way to run
+            if (fleeDx == 0 && fleeDy == 0) {
+                fleeDx = random.nextInt(3) - 1;
+                fleeDy = random.nextInt(3) - 1;
+            }
+        }
+    }
+
+    // run in a straight line away from the danger until the timer runs out
+    public void flee() {
+        int newX = position.x + fleeDx;
+        int newY = position.y + fleeDy;
+
+        // only move if its still on the map (otherwise it just stops at the edge)
+        if (newX >= 0 && newX < Main.WIDTH && newY >= 0 && newY < Main.HEIGHT) {
+            this.position.setLocation(newX, newY);
+        }
+
+        fleeTimer--;
+        if (fleeTimer <= 0) {
+            fleeing = false;
+            // forget the old trail position so it can pick the trail up again
+            lastX = -1;
+            lastY = -1;
+        }
+    }
 
 public void dropFood() throws Exception {
         if (this.carryingFood == false) {
