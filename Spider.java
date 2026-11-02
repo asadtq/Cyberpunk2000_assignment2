@@ -38,7 +38,7 @@ class Spider extends Ant {
         }
     }
 
-    // put scouts and workers in one list so i only need one loop
+    // put scouts and workers in one list
     private List<Ant> getAllAnts(List<Scout> scouts, List<Worker> workers) {
         List<Ant> allAnts = new ArrayList<>();
         allAnts.addAll(scouts);
@@ -46,7 +46,7 @@ class Spider extends Ant {
         return allAnts;
     }
 
-    // walk towards the closest ant she can see, if none then wander
+    // walk towards the closest ant it sees
     private void huntStep(List<Scout> scouts, List<Worker> workers) {
         Ant closest = null;
         double closestDistance = 999;
@@ -76,7 +76,7 @@ class Spider extends Ant {
     private void bite(List<Scout> scouts, List<Worker> workers) {
         for (Ant ant : getAllAnts(scouts, workers)) {
             if (ant.isAlive() && ant.getPosition().equals(position)) {
-                ant.takeDamage(ant.getHealth()); // takes all its health so it dies
+                ant.takeDamage(ant.getHealth()); // kill ant
                 markDanger(position.x, position.y);
                 digestTimer = DIGEST_MOVES;
                 break; // only eat one at a time
