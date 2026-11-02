@@ -66,12 +66,20 @@ static void update() {
     }
 
     try {
-        Queen.queenBrain(queen, scouts, workers, grid, WIDTH, HEIGHT, moveScoutsNow, moveWorkersNow);
+        queen.gettingOld(); // queen loses stamina over time, throws if she dies
     } catch (QueenDeadException e) {
         System.out.println("GAME OVER: " + e.getMessage());
         stopGame = true;
         return; // no point decaying pheromones etc, the game is over
     }
+
+    if (moveScoutsNow) {
+        moveScouts();
+    }
+    if (moveWorkersNow) {
+        moveWorkers();
+    }
+    checkPanic();
 
     // spider moves slower than the ants
     spiderMoveTimer++;
@@ -105,6 +113,125 @@ static void update() {
                 }
             }
         }
+    }
+}
+
+
+// if no ant comes home for this many ticks the queen assumes they died
+static int noScoutTimer = 0;
+static int noWorkerTimer = 0;
+static final int PANIC_LIMIT = 300;
+
+// move every scout. A scout that found food goes home, the others wander
+static void moveScouts() {
+    for (int i = 0; i < scouts.size(); i++) {
+        Scout scouterAnt = scouts.get(i);
+
+        if (scouterAnt.isPathfinding()) {
+            scouterAnt.returnToColony(WIDTH, HEIGHT);
+
+            // check if the scout got home
+            if (scouterAnt.getPosition().x == WIDTH / 2 && scouterAnt.getPosition().y == HEIGHT / 2) {
+                noScoutTimer = 0; // a scout came home, reset the emergency timer
+
+                // one new worker every time a scout gets back
+                Worker newWorkerAnt = queen.prodWorker();
+                if (newWorkerAnt != null) {
+                    workers.add(newWorkerAnt);
+                }
+            }
+        } else {
+            scouterAnt.wander(WIDTH, HEIGHT);
+        }
+    }
+}
+
+// move every worker
+static void moveWorkers() {
+    for (int j = 0; j < workers.size(); j++) {
+        Worker workerAnt = workers.get(j);
+
+        // worker is running away from the danger, thats all it does this tick
+        if (workerAnt.isFleeing()) {
+            workerAnt.flee();
+            continue;
+        }
+
+        // remember where the worker was so we know which way it came from
+        int oldX = workerAnt.getPosition().x;
+        int oldY = workerAnt.getPosition().y;
+
+        if (workerAnt.isReportingDeath()) {
+            // run straight home to tell the queen
+            int rdx = Integer.compare(WIDTH / 2, workerAnt.getPosition().x);
+            int rdy = Integer.compare(HEIGHT / 2, workerAnt.getPosition().y);
+            workerAnt.getPosition().translate(rdx, rdy);
+
+            if (workerAnt.getPosition().x == WIDTH / 2 && workerAnt.getPosition().y == HEIGHT / 2) {
+                workerAnt.setReportingDeath(false);
+                System.out.println("Queen: a worker died, we need more!");
+                Worker replacement = queen.prodWorker();
+                if (replacement != null) {
+                    workers.add(replacement);
+                }
+            }
+            continue; // skip the normal worker stuff this tick
+        }
+
+        if (workerAnt.isCarryingFood()) {
+            // walk back to the colony
+            int dx = Integer.compare(WIDTH / 2, workerAnt.getPosition().x);
+            int dy = Integer.compare(HEIGHT / 2, workerAnt.getPosition().y);
+            workerAnt.getPosition().translate(dx, dy);
+
+            if (workerAnt.getPosition().x == WIDTH / 2 && workerAnt.getPosition().y == HEIGHT / 2) {
+                noWorkerTimer = 0; // worker made it home, reset the emergency timer
+                try {
+                    workerAnt.dropFood();
+                    queen.feedQueen(1); // queen gets some stamina back for the food
+                } catch (Exception e) {
+                    System.out.println("worker had trouble dropping food - " + e.getMessage());
+                }
+            }
+
+        } else {
+            workerAnt.followTrail();
+
+            // grab food if the worker is on a food tile
+            int wx = workerAnt.getPosition().x;
+            int wy = workerAnt.getPosition().y;
+            if (grid[wx][wy] == CellType.FOOD) {
+                workerAnt.pickUpFood(1);
+                grid[wx][wy] = CellType.EMPTY;
+            }
+        }
+
+        // if the worker just stepped into the danger square, make it run the other way
+        workerAnt.checkForDanger(oldX, oldY);
+    }
+}
+
+// the queen doesnt magically know an ant died, if nobody comes home for a while she makes a new one
+static void checkPanic() {
+    noScoutTimer++;
+    noWorkerTimer++;
+
+    if (noScoutTimer > PANIC_LIMIT) {
+        System.out.println("Queen: no scouts have come home, must have died. Making a new one.");
+        Scout backupScout = queen.prodScout();
+        if (backupScout != null) {
+            scouts.add(backupScout);
+        }
+        noScoutTimer = 0; // reset so she doesnt spam a new scout every tick
+    }
+
+    if (noWorkerTimer > PANIC_LIMIT) {
+        System.out.println("Queen: no workers have come home, must have died. Making a new one.");
+        Worker backupWorker = queen.prodWorker();
+        if (backupWorker != null) {
+            workers.add(backupWorker);
+        }
+        noWorkerTimer = 0;
     }
 }
 

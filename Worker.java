@@ -144,10 +144,10 @@ public boolean isFleeing() { return fleeing; }
         }
     }
 
-    // run in a straight line away from the danger until the timer runs out
+    // run in a straight line in the opposite direction away from the danger until the timer runs out
     public void flee() {
-        int newX = position.x + fleeDx;
-        int newY = position.y + fleeDy;
+        int newX = position.x + (fleeDx *-1);
+        int newY = position.y + (fleeDy *-1);
 
         // only move if its still on the map (otherwise it just stops at the edge)
         if (newX >= 0 && newX < Main.WIDTH && newY >= 0 && newY < Main.HEIGHT) {
