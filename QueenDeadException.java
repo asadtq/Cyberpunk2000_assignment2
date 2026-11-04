@@ -1,5 +1,5 @@
 public class QueenDeadException extends Exception {
-    public QueenDeadException(String message) {
-        super(message);
+    public QueenDeadException(String message ) {
+        super(message );
     }
 }

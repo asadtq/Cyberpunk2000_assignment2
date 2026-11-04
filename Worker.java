@@ -19,35 +19,37 @@ class Worker extends Ant{
     int lastX = -1;
     int lastY = -1;
 
+
     
-    //pheremone trail lists
+    //pheromne trail lists
     List<Pheromone<Float>> trail = new ArrayList<>();
     
 
-    public Worker (int health, int stamina) {
-       super(health,stamina);
+    public Worker (int health, int stamina ) {
+       super(health,stamina );
        this.random = new Random();
-       this.position = new Point(10, 10); // Spawns the worker at the center colony
+       this.position = new Point(10, 10 ); // Spawns the worker at the center colony
        this.followingTrail = false;
        this.carryingFood = false;
        this.foodCarried = 0;
     }
 
-    public void setFollowingTrail(boolean followingTrail) {
+    public void setFollowingTrail(boolean followingTrail ) {
         this.followingTrail = followingTrail;
     }
     public boolean isFollowingTrail() { return followingTrail;}
-    public void setReportingDeath(boolean reportingDeath) { this.reportingDeath = reportingDeath; }
+    public void setReportingDeath(boolean reportingDeath ) { this.reportingDeath = reportingDeath; }
     public boolean isReportingDeath() { return reportingDeath; }
-    public void setCarryingFood(boolean carryingFood) {
+    public void setCarryingFood(boolean carryingFood ) {
         this.carryingFood = carryingFood;
     }
-    public boolean isCarryingFood () { return carryingFood;} 
+    public boolean isCarryingFood ( ) { return carryingFood;} 
     public int getFoodCarried() { return foodCarried; }
-    public void pickUpFood(int amount) {
+    public void pickUpFood(int amount ) {
         this.foodCarried = amount;
         this.carryingFood = true;
     }
+
     public void followTrail() { 
         int cx = position.x;
         int cy = position.y;
@@ -59,34 +61,34 @@ class Worker extends Ant{
         // 8 directions, scouts walk diagonally so the trail has diagonal steps in it
         int[][] dirs = {{1,0}, {-1,0}, {0,1}, {0,-1}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
         
-        for (int i = 0; i < dirs.length; i++) {
+        for (int i = 0; i < dirs.length; i++ ) {
             try {
-                int checkX = cx + dirs[i][0];
-                int checkY = cy + dirs[i][1];
+                int checkX = cx + dirs[i ][0 ];
+                int checkY = cy + dirs[i ][1 ];
                 //if this tile isnt the same as the last one we stood on. 
-                if (checkX == lastX && checkY == lastY) {
+                if (checkX == lastX && checkY == lastY ) {
                     continue; 
                 }
                 
-                if (Main.pheromoneGrid[checkX][checkY] != null) {
-                    //generic type requirement
-                    float str = ((Number) Main.pheromoneGrid[checkX][checkY].getStrength()).floatValue();
-                    if (str < best && str > 0.01f) {
+                if (Main.pheromoneGrid[checkX ][checkY ] != null ) {
+                    //generik type requirement
+                    float str = ((Number) Main.pheromoneGrid[checkX ][checkY ].getStrength() ).floatValue();
+                    if (str < best && str > 0.01f ) {
                         best = str;
                         nextX = checkX;
                         nextY = checkY;
                     }
                 }
             } 
-            catch (ArrayIndexOutOfBoundsException e) {
+            catch (ArrayIndexOutOfBoundsException e ) {
                 // try/catch requirement
-                //System.out.println("worker at edge of map");
+                //System.out.println("worker at edge of map" );
             }
         }
         
         // anti-stuck code
-        if (nextX == cx && nextY == cy) {
-            wander(20,20);
+        if (nextX == cx && nextY == cy ) {
+            wander(20,20 );
             // wander already moved us, dont overwrite it with the old position below
             this.lastX = cx;
             this.lastY = cy;
@@ -97,44 +99,46 @@ class Worker extends Ant{
         this.lastX = cx;
         this.lastY = cy;
         //set
-        this.position.setLocation(nextX, nextY);
+        this.position.setLocation(nextX, nextY );
     }
 
-  public void wander(int gridWidth, int gridHeight) {
+  public void wander(int gridWidth, int gridHeight ) {
         // Pick a random direction (-1, 0, or 1) for x and y
-        int dx = random.nextInt(3) - 1;
-        int dy = random.nextInt(3) - 1;
+        int dx = random.nextInt(3 ) - 1;
+        int dy = random.nextInt(3 ) - 1;
 
         int newX = position.x + dx;
         int newY = position.y + dy;
 
         //Boundary check for wander 
-        if (newX < 0 || newX >= gridWidth || newY < 0 || newY >= gridHeight) return;
+        if (newX < 0 || newX >= gridWidth || newY < 0 || newY >= gridHeight ) return;
         
         // new pos
-        this.position.setLocation(newX, newY);
+        this.position.setLocation(newX, newY );
   }
        
+
 
 // same as Ant.flee() but when it stops running it forgets the old trail spot so it can pick the trail up again
     @Override
     public void flee() {
         super.flee();
-        if (!fleeing) {
+        if (!fleeing ) {
             lastX = -1;
             lastY = -1;
         }
     }
 
+
 public void dropFood() throws Exception {
-        if (this.carryingFood == false) {
-            throw new Exception("ant doesnt have food to drop");
+        if (this.carryingFood == false ) {
+            throw new Exception("ant doesnt have food to drop" );
         } else {
             this.carryingFood = false;
             this.foodCarried = 0;
             
             // Queen +50 stamina
-            Main.queen.setStamina(Main.queen.getStamina() + 50); 
+            Main.queen.setStamina(Main.queen.getStamina() + 50 ); 
         }
     }
     
